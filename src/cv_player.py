@@ -4,7 +4,7 @@ import time
 import cv2
 import numpy as np
 from PIL import ImageGrab
-from utils import *
+from src.utils import *
 
 
 class CVPlayer:
@@ -16,8 +16,8 @@ class CVPlayer:
                  save_img=False,
                  save_video=False,
                  frame_stride=1,
-                 preprocessing_fun=None,
-                 processing_fun=None,
+                 pre_process=None,
+                 process=None,
                  show_fps=True,
                  frame_sync=False,
                  save_suffix="_out"):
@@ -29,8 +29,8 @@ class CVPlayer:
         self.save_img = save_img
         self.save_video = save_video
         self.frame_stride = frame_stride
-        self.preprocessing_fun = preprocessing_fun
-        self.processing_fun = processing_fun
+        self.pre_process = pre_process
+        self.process = process
         self.show_fps = show_fps
         self.frame_sync = frame_sync
         self.save_suffix = save_suffix
@@ -108,7 +108,7 @@ class CVPlayer:
         self.cap.release()
         self.writer_release()
 
-    def play_camera(self, source, w=1920, h=1080):
+    def play_camera(self, source=0, w=1920, h=1080):
         print("open: ", source)
         self.source = 'camera'
         self.cap = cv2.VideoCapture(source)
@@ -218,14 +218,14 @@ class CVPlayer:
         else:
             self.save_name = os.path.join(self.save_path, str(self.frame_num).zfill(8))
 
-        if self.preprocessing_fun:
-            self.frame = self.preprocessing_fun(self.frame)
+        if self.pre_process:
+            self.frame = self.pre_process(self.frame)
 
         if self.save_img:
             cv2.imwrite(self.save_name + ".jpg", self.frame)
 
-        if self.processing_fun:
-            self.frame = self.processing_fun(self.frame)
+        if self.process:
+            self.frame = self.process(self.frame)
             if self.save_img:
                 cv2.imwrite(self.save_name + self.save_suffix + ".jpg", self.frame)
 
@@ -348,8 +348,8 @@ class CVPlayer:
         print("record video at: " + self.video_name)
 
     def update_size_by_preprocessing_fun(self):
-        if self.preprocessing_fun:
-            self.h, self.w, _ = cal_new_size((self.h, self.w, 3), self.preprocessing_fun)
+        if self.pre_process:
+            self.h, self.w, _ = cal_new_size((self.h, self.w, 3), self.pre_process)
 
     def writer_release(self):
         if self.writer:
@@ -392,7 +392,6 @@ class CVPlayer:
 
 
 if __name__ == '__main__':
-    player = CVPlayer(show_scare=0.5)
-    # player.visible = False
+    player = CVPlayer()
     player.play_video_folder(r"E:\Videos\Anime\[SweetSub&VCB-Studio] Flip Flappers [Ma10p_1080p]")
     # player.play_img_folder(r"D:\Illustrations")

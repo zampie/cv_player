@@ -1,6 +1,4 @@
-from cv_player import CVPlayer
-from utils import *
-from functools import partial
+from src.cv_player import CVPlayer
 
 if __name__ == '__main__':
     # 基本用法
@@ -51,8 +49,8 @@ if __name__ == '__main__':
                       save_img=False,  # 是否切帧
                       save_video=False,  # 是否保存视频
                       frame_stride=1,  # 帧的跨度
-                      preprocessing_fun=None,  # 前处理函数的函数指针，建议进行resize或padding等操作
-                      processing_fun=None,  # 图片处理函数的函数指针，建议进行绘图操作，不支持改变图片大小
+                      pre_process=None,  # 前处理函数的函数指针，建议进行resize或padding等操作
+                      process=None,  # 图片处理函数的函数指针，建议进行绘图操作，不支持改变图片大小
                       show_fps=True,  # 是否显示fps
                       frame_sync=False,  # 帧同步：是否限制最大帧率
                       save_suffix="_out")  # 输出切帧文件的后缀名，仅在有图片处理函数时才启用
@@ -64,5 +62,7 @@ if __name__ == '__main__':
     player.play_screen()
     # player.play(r"your_video_name.mp4")
     # player.play_video(0)
+    # player.play_camera(0)
     # player.show_img_folder(r"your_img_folder", delay=0, fps=1)
     # player.cap_screen()
+    # ...

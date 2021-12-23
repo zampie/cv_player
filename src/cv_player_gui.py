@@ -4,13 +4,13 @@ import time
 import cv2
 import numpy as np
 from PIL import ImageGrab
-from utils import *
-from cv_player import CVPlayer
+from src.utils import *
+from src.cv_player import CVPlayer
 
 
 class CVPlayerGUI(CVPlayer):
-    def __init__(self):
-        super(CVPlayerGUI, self).__init__(visible=True)
+    def __init__(self, *args, **kwargs):
+        super(CVPlayerGUI, self).__init__(*args, **kwargs)
         self.auto_set_bat = False
 
     def play_video(self, source):
@@ -120,5 +120,5 @@ class CVPlayerGUI(CVPlayer):
 
 if __name__ == '__main__':
     player = CVPlayerGUI()
-    player.show_scare = 1
-    player.play_video_folder(r"E:\Videos\Anime")
+    player.play_video_folder(r"E:\Videos\Anime\[SweetSub&VCB-Studio] Flip Flappers [Ma10p_1080p]")
+    # player.play_camera(0)
