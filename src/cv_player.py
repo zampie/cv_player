@@ -177,6 +177,7 @@ class CVPlayer:
             clock.fps_sync(self.target_fps if self.frame_sync else 0)
             self.avg_fps = clock.avg_fps
             self.instant_fps = clock.instant_fps
+        self.writer_release()
 
     def play_img(self, file_name):
         try:
