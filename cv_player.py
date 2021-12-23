@@ -41,13 +41,12 @@ class CVPlayer:
         self.cap = None
         self.writer = None
         self.frame = None
-        self.out_frame = None
         self.ori_fps = 15
         self.target_fps = self.ori_fps
         self.frame_time = 1e-13
         self.avg_fps = 0
         self.instant_fps = 0
-        self.frame_id = -1
+        self.frame_num = -1
         self.total_frames = 0
         self.file_id = 0
         self.w = 0
@@ -80,18 +79,18 @@ class CVPlayer:
 
         cv2.namedWindow(self.window_name)
         cv2.resizeWindow(self.window_name, int(self.w * self.show_scare), int(self.h * self.show_scare))
-        cv2.setMouseCallback(self.window_name, self.call_mouse, param=self.frame_id)
+        cv2.setMouseCallback(self.window_name, self.call_mouse, param=self.frame_num)
 
-        self.frame_id = -1
+        self.frame_num = -1
         clock = Clock()
         while self.cap.isOpened() and not self.exit_flag and not self.skip_flag:
-            self.frame_id += 1
+            self.frame_num += 1
 
             ret, self.frame = self.cap.read()
             if not ret:
                 print("video get frame field, break")
                 break
-            if self.frame_id % self.frame_stride != 0:
+            if self.frame_num % self.frame_stride != 0:
                 continue
 
             self.frame_show()
@@ -103,8 +102,7 @@ class CVPlayer:
             self.instant_fps = clock.instant_fps
 
             while self.pause:
-                self.update_frame()
-                self.wait_key(1)
+                self.wait_key(0)
 
         self.file_id += 1
         self.cap.release()
@@ -131,12 +129,12 @@ class CVPlayer:
 
         clock = Clock()
         while self.cap.isOpened() and not self.exit_flag:
-            self.frame_id += 1
+            self.frame_num += 1
             ret, self.frame = self.cap.read()
             if not ret:
                 print("camera get frame field, retry...")
                 continue
-            if self.frame_id % self.frame_stride != 0:
+            if self.frame_num % self.frame_stride != 0:
                 continue
             self.frame_show()
             self.wait_key(int(not self.pause))
@@ -171,7 +169,7 @@ class CVPlayer:
 
         clock = Clock()
         while not self.exit_flag:
-            self.frame_id += 1
+            self.frame_num += 1
             self.frame = pil_to_cv(ImageGrab.grab(bbox=bbox))
             self.frame_show()
             self.wait_key(int(not self.pause))
@@ -184,7 +182,7 @@ class CVPlayer:
         try:
             print("open: ", file_name)
             self.source = file_name
-            self.frame_id += 1
+            self.frame_num += 1
             self.frame = cv2.imdecode(np.fromfile(file_name, dtype=np.uint8), cv2.IMREAD_COLOR)
             # self.frame = cv2.imread(file_name)
             self.frame_show()
@@ -216,9 +214,9 @@ class CVPlayer:
         # sub_filename = os.path.splitext(self.file_name.split("\\")[-1])[0]
         # self.save_name = os.path.join(self.save_path, sub_filename + '_' + str(self.frame_id).zfill(8))
         if self.cap:
-            self.save_name = os.path.join(self.save_path, str(self.file_id) + '_' + str(self.frame_id).zfill(8))
+            self.save_name = os.path.join(self.save_path, str(self.file_id) + '_' + str(self.frame_num).zfill(8))
         else:
-            self.save_name = os.path.join(self.save_path, str(self.frame_id).zfill(8))
+            self.save_name = os.path.join(self.save_path, str(self.frame_num).zfill(8))
 
         if self.preprocessing_fun:
             self.frame = self.preprocessing_fun(self.frame)
@@ -227,11 +225,12 @@ class CVPlayer:
             cv2.imwrite(self.save_name + ".jpg", self.frame)
 
         if self.processing_fun:
-            self.out_frame = self.processing_fun(self.frame)
+            self.frame = self.processing_fun(self.frame)
             if self.save_img:
                 cv2.imwrite(self.save_name + self.save_suffix + ".jpg", self.frame)
 
         if self.save_video:
+            print('write frame num: ', self.frame_num)
             self.writer.write(self.frame)
 
         if self.visible:
@@ -252,7 +251,7 @@ class CVPlayer:
             self.pause = not self.pause
             print("pause: ", self.pause)
         if key == 'x':
-            print("capture: ", self.frame_id)
+            print("capture: ", self.frame_num)
             cv2.imwrite(self.save_name + "_cap.jpg", self.frame)
         if key == 't':
             self.show_fps = not self.show_fps
@@ -260,7 +259,7 @@ class CVPlayer:
         if key == 's':
             self.save_img = not self.save_img
             print("save img: ", self.save_img)
-        if key == 'f':
+        if key == 'c':
             self.frame_sync = not self.frame_sync
             print("frame_sync: ", self.frame_sync)
         # 没有writer时，不接受录屏
@@ -286,22 +285,26 @@ class CVPlayer:
         if key == 'o':
             self.target_fps = self.ori_fps
             print("reset fps: ", self.target_fps)
-        if key == 'j' and self.cap:
-            self.frame_id = self.frame_id - 1
-            print("reset frame at: ", self.frame_id)
+        if key == 'd' and self.cap:
+            self.frame_num = self.frame_num - 1
+            print("reset frame at: ", self.frame_num)
             self.pause = True
-        if key == 'k' and self.cap:
-            self.frame_id = self.frame_id + 1
-            print("reset frame at: ", self.frame_id)
+            self.update_frame()
+        if key == 'f' and self.cap:
+            self.frame_num = self.frame_num + 1
+            print("reset frame at: ", self.frame_num)
             self.pause = True
-        if key == 'J' and self.cap:
-            self.frame_id = self.frame_id - 100
-            print("reset frame at: ", self.frame_id)
+            self.update_frame()
+        if key == 'D' and self.cap:
+            self.frame_num = self.frame_num - 100
+            print("reset frame at: ", self.frame_num)
             self.pause = True
-        if key == 'K' and self.cap:
-            self.frame_id = self.frame_id + 100
-            print("reset frame at: ", self.frame_id)
+            self.update_frame()
+        if key == 'F' and self.cap:
+            self.frame_num = self.frame_num + 100
+            print("reset frame at: ", self.frame_num)
             self.pause = True
+            self.update_frame()
         if key == '\r':
             self.pause = False
             self.skip_flag = True
@@ -310,16 +313,15 @@ class CVPlayer:
             print("esc")
             self.pause = False
             self.exit_flag = True
-            # self.player_exit()
 
     def update_frame(self):
         if not self.cap:
             return
         # print("set frame at: ", self.frame_id)
-        self.frame_id = max(0, self.frame_id)
-        self.frame_id = min(self.frame_id, self.total_frames - 1)
-        # print("update frame at: ", self.frame_id)
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_id)
+        self.frame_num = max(0, self.frame_num)
+        self.frame_num = min(self.frame_num, self.total_frames - 1)
+        print("update frame at: ", self.frame_num)
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num)
         ret, self.frame = self.cap.read()
         if not ret:
             print("update frame field")
@@ -365,7 +367,7 @@ class CVPlayer:
         out_text = ""
         out_text += "avg fps: %d " % self.avg_fps
         out_text += "instant fps: %d " % self.instant_fps
-        out_text += "id: " + str(self.frame_id) + " "
+        out_text += "id: " + str(self.frame_num) + " "
         color = [0, 200, 0]
         if self.save_video:
             color[1] = 0
@@ -380,17 +382,17 @@ class CVPlayer:
         if event != 0:
             # print(event)
             if event == cv2.EVENT_LBUTTONDOWN:
-                print("frame: ", self.frame_id, "position: %d, %d" % (x, y))
+                print("frame: ", self.frame_num, "position: %d, %d" % (x, y))
             if event == cv2.EVENT_LBUTTONDBLCLK:
                 self.pause = not self.pause
                 print("pause: ", self.pause)
             if event == cv2.EVENT_RBUTTONDOWN:
-                print("capture: ", self.frame_id)
+                print("capture: ", self.frame_num)
                 cv2.imwrite(self.save_name + "_cap.jpg", self.frame)
 
 
 if __name__ == '__main__':
     player = CVPlayer(show_scare=0.5)
     # player.visible = False
-    # player.play_video_folder(r"E:\Videos\Anime\[VCB-Studio] Kono Bijutsubu ni wa Mondai ga Aru! [Ma10p_1080p]")
-    player.play_img_folder(r"D:\Illustrations")
+    player.play_video_folder(r"E:\Videos\Anime\[SweetSub&VCB-Studio] Flip Flappers [Ma10p_1080p]")
+    # player.play_img_folder(r"D:\Illustrations")
