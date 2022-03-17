@@ -1,4 +1,5 @@
 import sys
+import os
 import time
 
 import cv2
@@ -55,6 +56,20 @@ class CVPlayer:
         self.exit_flag = False
         self.skip_flag = False
         makedir(self.save_path)
+
+    def play(self, source, **kwargs):
+        img_suffix = ['.jpg', '.jpeg', '.png']
+
+        if isinstance(source, int):
+            self.play_camera(source, **kwargs)
+        elif os.path.isfile(source):
+            suffix = os.path.splitext(source)[-1]
+            if suffix.lower() in img_suffix:
+                self.play_img(source)
+            else:
+                self.play_video(source)
+        elif os.path.isdir(source):
+            self.play_video_folder(source)
 
     def play_video(self, source):
         print("open: ", source)
@@ -384,9 +399,9 @@ class CVPlayer:
             # print(event)
             if event == cv2.EVENT_LBUTTONDOWN:
                 print("frame: ", self.frame_num, "position: %d, %d" % (x, y))
-            if event == cv2.EVENT_LBUTTONDBLCLK:
-                self.pause = not self.pause
-                print("pause: ", self.pause)
+            # if event == cv2.EVENT_LBUTTONDBLCLK:
+            #     self.pause = not self.pause
+            #     print("pause: ", self.pause)
             if event == cv2.EVENT_RBUTTONDOWN:
                 print("capture: ", self.frame_num)
                 cv2.imwrite(self.save_name + "_cap.jpg", self.frame)
@@ -394,5 +409,6 @@ class CVPlayer:
 
 if __name__ == '__main__':
     player = CVPlayer()
-    player.play_video_folder(r"E:\Videos\Anime\[SweetSub&VCB-Studio] Flip Flappers [Ma10p_1080p]")
+    # player.play_video_folder(r"E:\Videos\Anime\[SweetSub&VCB-Studio] Flip Flappers [Ma10p_1080p]")
     # player.play_img_folder(r"D:\Illustrations")
+    player.play_video(r'C:\\Users\\zampi\\OneDrive\\Code\\cv_learn\\TOM AND JERRY EP19 Mouse in Manhattan (1945).mkv')
