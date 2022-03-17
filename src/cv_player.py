@@ -194,7 +194,7 @@ class CVPlayer:
             self.instant_fps = clock.instant_fps
         self.writer_release()
 
-    def play_img(self, file_name):
+    def play_img(self, file_name, pause=True):
         try:
             print("open: ", file_name)
             self.source = file_name
@@ -202,7 +202,7 @@ class CVPlayer:
             self.frame = cv2.imdecode(np.fromfile(file_name, dtype=np.uint8), cv2.IMREAD_COLOR)
             # self.frame = cv2.imread(file_name)
             self.frame_show()
-            self.wait_key(int(not self.pause))
+            self.wait_key(int(not pause))
             self.file_id += 1
 
         except Exception as e:
@@ -218,7 +218,7 @@ class CVPlayer:
         # file_names = read_files(folder)
         clock = Clock()
         for file_name in file_names:
-            self.play_img(file_name)
+            self.play_img(file_name, self.pause)
             if self.exit_flag:
                 break
             clock.update()
