@@ -10,6 +10,7 @@ import os
 
 def multiprocess_launch(file, mode=None):
     play_thread = multiprocessing.Process(target=player_selector, args=(file, mode, paras))
+    play_thread.daemon = True
     play_thread.start()
 
 
@@ -36,7 +37,6 @@ def drop_event(binary_files):
 
     print(file_list)
     multiprocess_launch(file_list[0])
-    # gui.destroy()
 
 
 def open_file_event():
