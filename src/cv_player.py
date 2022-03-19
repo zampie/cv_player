@@ -381,9 +381,9 @@ class CVPlayer:
 
     def put_text(self, show_frame):
         out_text = ""
-        out_text += "avg fps: %d " % self.avg_fps
-        out_text += "instant fps: %d " % self.instant_fps
         out_text += "id: " + str(self.frame_num) + " "
+        out_text += "fps: %d " % self.avg_fps
+        # out_text += "ifps: %d " % self.instant_fps
         color = [0, 200, 0]
         if self.save_video:
             color[1] = 0

@@ -1,11 +1,11 @@
-from src.mediapipe_api import *
+from src.mediapipe_api import PoseDetector
 from src.cv_player_gui import CVPlayerGUI as CVPlayer
 # from cv_player import CVPlayer
 from functools import partial
 
 
-pre_process = partial(cv2.resize, dsize=(960, 540))
-# preprocess = None
+# pre_process = partial(cv2.resize, dsize=(960, 540))
+pre_process = None
 
 # model = HandDetector()
 model = PoseDetector()
