@@ -1,3 +1,4 @@
+import logging
 import sys
 import time
 
@@ -36,7 +37,7 @@ class CVPlayerGUI(CVPlayer):
 
         cv2.namedWindow(self.window_name)
         cv2.resizeWindow(self.window_name, int(self.w * self.show_scare), int(self.h * self.show_scare))
-        cv2.setMouseCallback(self.window_name, self.call_mouse, param=self.frame_num)
+        cv2.setMouseCallback(self.window_name, self.call_mouse, param=self.frame_id)
         cv2.createTrackbar("pos", self.window_name, 0, self.total_frames - 1, self.call_pos_bar)
 
         # cv2.setWindowProperty(self.window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -47,24 +48,24 @@ class CVPlayerGUI(CVPlayer):
         cv2.setTrackbarPos("pos", self.window_name, 0)
         self.auto_set_bat = False
 
-        self.frame_num = -1
+        self.frame_id = -1
         clock = Clock()
         while self.cap.isOpened() and not self.exit_flag and not self.skip_flag:
-            self.frame_num += 1
+            self.frame_id += 1
             # print("frame id: ", self.frame_id)
 
             # 防止回调函数执行
             self.auto_set_bat = True
-            cv2.setTrackbarPos("pos", self.window_name, self.frame_num)
+            cv2.setTrackbarPos("pos", self.window_name, self.frame_id)
             # cv2.setTrackbarPos("pos", self.window_name, 50)
             self.auto_set_bat = False
             ret, self.frame = self.cap.read()
             if not ret:
                 print("not ret")
                 break
-            if self.frame_num % self.frame_stride != 0:
+            if self.frame_id % self.frame_stride != 0:
                 continue
-            if self.frame_num == self.total_frames - 1:
+            if self.frame_id == self.total_frames - 1:
                 self.pause = True
 
             self.frame_show()
@@ -89,10 +90,10 @@ class CVPlayerGUI(CVPlayer):
         if self.auto_set_bat:
             # print("auto update bar")
             return
-        print("call bar pos:", pos)
-        self.frame_num = pos
-        if self.frame_num < self.total_frames - 1:
-            print("bar call update")
+        print("call bar pos: %d" % pos)
+        self.frame_id = pos
+        if self.frame_id < self.total_frames - 1:
+            # print("bar call update")
             self.update_frame()
         else:
             print("bar pause")
@@ -102,15 +103,15 @@ class CVPlayerGUI(CVPlayer):
         if not self.cap:
             return
         # print("set frame at: ", self.frame_id)
-        self.frame_num = max(0, self.frame_num)
-        self.frame_num = min(self.frame_num, self.total_frames - 1)
+        self.frame_id = max(0, self.frame_id)
+        self.frame_id = min(self.frame_id, self.total_frames - 1)
         # print("update frame at: ", self.frame_id)
 
         self.auto_set_bat = True
-        cv2.setTrackbarPos("pos", self.window_name, self.frame_num)
+        cv2.setTrackbarPos("pos", self.window_name, self.frame_id)
         self.auto_set_bat = False
 
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_num)
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.frame_id)
         ret, self.frame = self.cap.read()
         if not ret:
             print("update frame field")

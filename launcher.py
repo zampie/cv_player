@@ -1,32 +1,22 @@
-from src.cv_player_gui import CVPlayerGUI
+import os
+import multiprocessing
 import tkinter
 from tkinter import filedialog, messagebox
-from src.mediapipe_api import PoseDetector
 
 import windnd
-import threading
-import multiprocessing
-
-import os
+from src.cv_player_gui import CVPlayerGUI
+from src.mediapipe_api import PoseDetector
 
 
 def player_init():
-    paras = {"show_fps": False}
+    paras = {"show_fps": False, "frame_sync": True}
     # paras["process"] = PoseDetector().run
     player = CVPlayerGUI(**paras)
     return player
 
 
-def multiprocess_launch(source, mode=None):
-    play_thread = multiprocessing.Process(target=player_selector, args=(source, mode))
-    # play_thread = PlayerSelector(source, mode, g_paras)
-    play_thread.daemon = True
-    play_thread.start()
-
-
 def player_selector(source, mode):
     print('process start : ', end=" ")
-    print('thread name: ', threading.currentThread().getName(), end=" ")
     print('pid : ', os.getpid())
 
     player = player_init()
@@ -41,8 +31,14 @@ def player_selector(source, mode):
         player.play(source)
 
     print('process over : ', end=" ")
-    print('thread name: ', threading.currentThread().getName(), end=" ")
     print('pid : ', os.getpid())
+
+
+def multiprocess_launch(source, mode=None):
+    play_thread = multiprocessing.Process(target=player_selector, args=(source, mode))
+    # play_thread = PlayerSelector(source, mode, g_paras)
+    play_thread.daemon = True
+    play_thread.start()
 
 
 def drop_event(binary_files):
