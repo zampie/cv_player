@@ -160,6 +160,55 @@ def decorator_timer(timer_unit="ms"):
     return timer
 
 
+class ClassDecoratorTimer:
+    def __init__(self, fun):
+        self.fun = fun
+
+    def __call__(self, *args, **kwargs):
+        print("args: ", args)
+        time_str = time.time()
+
+        print(self.fun.__name__, ": start")
+        res = self.fun(*args, **kwargs)
+
+        time_cost = time.time() - time_str
+
+        print(self.fun.__name__ + " cost: %.3f " % time_cost + 's')
+        return res
+
+
+class ObjectDecoratorTimer:
+    def __init__(self, timer_unit="s"):
+        self.timer_unit = timer_unit
+
+    def __call__(self, fun):
+        @wraps(fun)
+        def wrapper(*args, **kwargs):
+
+            print("args: ", args)
+            time_str = time.time()
+
+            print(fun.__name__, ": start")
+            res = fun(*args, **kwargs)
+
+            time_cost = time.time() - time_str
+
+            unit = self.timer_unit
+            if unit == "ms":
+                time_cost = time_cost * 1000
+            elif unit == "min":
+                time_cost = time_cost / 60
+            elif unit == "h":
+                time_cost = time_cost / 3600
+            else:
+                unit = "s"
+
+            print(fun.__name__ + " cost: %.3f " % time_cost + unit)
+            return res
+
+        return wrapper
+
+
 class ContextTimer:
     def __init__(self, name="timer", unit="ms"):
         self.name = name
@@ -169,7 +218,7 @@ class ContextTimer:
     def __enter__(self):
         print(self.name + ": timer start")
         self.time_str = time.time()
-        return self.time_str
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         time_cost = time.time() - self.time_str
@@ -227,7 +276,7 @@ class Clock:
 
 
 if __name__ == '__main__':
-    file_name = "1.jpg"
+    file_name = r"../capture/0_00026965_cap.jpg"
     img = cv2.imread(file_name)
     print(img.shape)
 
